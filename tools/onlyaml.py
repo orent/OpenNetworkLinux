@@ -10,6 +10,7 @@ import yaml
 import os
 import pprint
 import tempfile
+import shlex
 from string import Template
 
 class OnlYamlError(Exception):
@@ -65,13 +66,13 @@ def loadf(fname, vard={}):
     def onlyaml_include(loader, node):
         # Get the path out of the yaml file
         directive = node.value
-        fields = directive.split()
+        fields = shlex.split(directive)
         fname = fields[0]
         options = fields[1:]
 
         for opt in options:
             try:
-                (k,v) = opt.split('=')
+                (k,v) = opt.split('=', 1)
             except ValueError:
                 raise OnlYamlError("Bad include directive: %s" % opt)
             variables[k] = v;
