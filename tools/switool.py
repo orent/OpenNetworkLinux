@@ -22,7 +22,7 @@ class OnlSwitchImage(object):
         self.zipfile.write(fname, arcname=arcname, compress_type = zipfile.ZIP_DEFLATED if compressed else zipefile.ZIP_STORED)
 
     def add_rootfs(self, rootfs_sqsh):
-        self.add(rootfs_sqsh)
+        self.add(rootfs_sqsh, compressed=False)
 
     def add_manifest(self, manifest):
         self.add(manifest, arcname="manifest.json")

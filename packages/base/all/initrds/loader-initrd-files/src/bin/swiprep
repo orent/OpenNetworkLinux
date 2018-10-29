@@ -149,6 +149,10 @@ esac
 
 if test "${mode_install}${mode_overlay}"; then
   for arch in $ARCH_LIST; do
+    if swiloop "$swipath" "rootfs-${arch}.sqsh" "$workdir/rootfs.sqsh"; then
+      echo "*** successfully set up loop device to squashfs"
+      break;
+    fi
     if unzip -q "$swipath" "rootfs-${arch}.sqsh" -d "$workdir"; then
       :
     else
@@ -160,7 +164,7 @@ if test "${mode_install}${mode_overlay}"; then
       break;
     fi
   done
-  if test ! -s "$workdir/rootfs.sqsh"; then
+  if test ! -s "$workdir/rootfs.sqsh" && test ! -b "$workdir/rootfs.sqsh" ; then
     echo "*** cannot find a valid rootfs" 1>&2
     exit 1
   fi

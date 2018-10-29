@@ -1,0 +1,35 @@
+#!/usr/bin/python
+
+"""swiloop
+
+If a squashfs image is stored uncompressed within the .swi
+this script will set up a loop device to point to it directly
+without requiring it to be extracted.
+"""
+import zipfile, subprocess
+
+def main(swifile, sqsh, dest):
+    z = zipfile.ZipFile(swifile)
+    for zi in z.filelist:
+        if zi.filename == sqsh:
+            break
+    else:
+        return 1
+
+    if zi.compress_type != zipfile.ZIP_STORED:
+        return 2
+
+    zf = z.open(zi)
+    ofs = zf._fileobj.tell()
+    if zf._fileobj.read(4) != b'hsqs':
+        return 3
+
+    loopdev = subprocess.check_output(['/sbin/losetup', '-f'], universal_newlines=True).strip()
+    subprocess.check_call(['/sbin/losetup', '-r', '-o', str(ofs), loopdev, swifile])
+    subprocess.check_call(['/bin/cp', '-pR', loopdev, dest])
+    assert open(dest, 'r').read(4) == b'hsqs'   # final sanity check
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(main(*sys.argv[1:]))
+
